@@ -192,7 +192,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             purchases__user=user).values(
                 'ingredient__name',
                 'ingredient__measurement_unit'
-        ).annotate(amount=Sum('amount'))
+        ).annotate(amount=Sum('recipe__amount'))
         filename = f'{user.username}_shopping_list.txt'
         shopping_list = (
             f'Список покупок({user.first_name})\n'

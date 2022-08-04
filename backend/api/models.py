@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
+from django.db.models import UniqueConstraint
 
 User = get_user_model()
 
@@ -58,14 +59,14 @@ class Recipe(models.Model):
             'Время приготовления не может быть меньше одной минуты'
         )],
     )
-    is_favorited = models.BooleanField(
-        'В избранном',
-        default=False
-    )
-    is_in_shopping_cart = models.BooleanField(
-        'В списке покупок',
-        default=False
-    )
+    # is_favorited = models.BooleanField(
+    #     'В избранном',
+    #     default=False
+    # )
+    # is_in_shopping_cart = models.BooleanField(
+    #     'В списке покупок',
+    #     default=False
+    # )
     pub_date = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Дата публикации',
@@ -147,11 +148,17 @@ class Ingredient(models.Model):
 class AmountIngredient(models.Model):
     """ Количество ингридиентов в блюде."""
 
-    ingredients = models.ForeignKey(
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name='Рецепт',
+        related_name='recipe',
+    )
+    ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
         verbose_name='Ингредиенты',
-        related_name='recipe',
+        related_name='ingredient',
     )
     amount = models.PositiveIntegerField(
         verbose_name='Количество ингредиента',
@@ -166,9 +173,15 @@ class AmountIngredient(models.Model):
     class Meta:
         verbose_name = 'Количество ингредиента'
         verbose_name_plural = 'Количество ингредиентов'
+        constraints = (
+            UniqueConstraint(
+                fields=('recipe', 'ingredient'),
+                name='unique_ingredient',
+            ),
+        )
 
     def __str__(self):
-        return f'{self.amount} {self.ingredients}'
+        return f'{self.amount} {self.ingredient}'
 
 
 class Favorite(models.Model):
@@ -192,6 +205,12 @@ class Favorite(models.Model):
     class Meta:
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
+        constraints = (
+            UniqueConstraint(
+                fields=('user', 'recipe'),
+                name='unique_favorite_recipe',
+            ),
+        )
 
     def __str__(self):
         return f'Рецепт {self.recipe} в избранном у {self.user}'
@@ -216,6 +235,12 @@ class Follow(models.Model):
     class Meta:
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
+        constraints = (
+            UniqueConstraint(
+                fields=('user', 'author'),
+                name='unique_for_author',
+            ),
+        )
 
     def __str__(self):
         return f'{self.user} подписан на {self.author}'
@@ -241,6 +266,12 @@ class Purchase(models.Model):
         ordering = ('-date_added',)
         verbose_name = 'Покупка'
         verbose_name_plural = 'Покупки'
+        constraints = (
+            UniqueConstraint(
+                fields=('user', 'recipe'),
+                name='unique_purchase',
+            ),
+        )
 
     def __str__(self):
         return f'Рецепт {self.recipe} в списке покупок {self.user}'
