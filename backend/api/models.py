@@ -13,11 +13,11 @@ class Recipe(models.Model):
         name(str) - Название рецепта.
         author(int) - Автор рецепта.
         tags(int) - Тэги рецепта. Связь M2M с моделью Tag.
-        ingredients(int) - Ингридиенты для приготовления.
+        ingredients(int) - Ингредиенты для приготовления.
                            Связь M2M с моделью AmountIngredient.
         pub_date(datetime) - Дата добавления рецепта.
         image(str) - Изображение рецепта.
-        text(str) - Описание рецепта.
+        text(str) - Описание рецепта.ё
         cooking_time(int) - Время приготовления рецепта.
     """
 
@@ -59,14 +59,6 @@ class Recipe(models.Model):
             'Время приготовления не может быть меньше одной минуты'
         )],
     )
-    # is_favorited = models.BooleanField(
-    #     'В избранном',
-    #     default=False
-    # )
-    # is_in_shopping_cart = models.BooleanField(
-    #     'В списке покупок',
-    #     default=False
-    # )
     pub_date = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Дата публикации',

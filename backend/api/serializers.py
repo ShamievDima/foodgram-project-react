@@ -70,24 +70,6 @@ class TagSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# class TagListField(serializers.RelatedField):
-#     def to_representation(self, obj):
-#         return {
-#             'id': obj.id,
-#             'name': obj.name,
-#             'color': obj.color,
-#             'slug': obj.slug
-#         }
-#
-#     def to_internal_value(self, data):
-#         try:
-#             return Tag.objects.get(id=data)
-#         except ObjectDoesNotExist:
-#             raise serializers.ValidationError(
-#                 'Недопустимый первичный ключ "404" - объект не существует.'
-#             )
-
-
 class IngredientSerializer(serializers.ModelSerializer):
     """ Сериализатор для модели Ingredient."""
 
@@ -157,17 +139,22 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
                   'is_in_shopping_cart', 'name', 'image', 'text',
                   'cooking_time')
 
+    def unique_item(self, items, Model):
+         item_list = []
+         for item in items:
+             append_item = get_object_or_404(Model,
+                                             id=item['id'])
+             if append_item in item_list:
+                 raise serializers.ValidationError('Элемент должен '
+                                                   'быть уникальным')
+             item_list.append(append_item)
+
+
     def validate(self, data):
-        ingredients = self.initial_data.get('ingredients')
-        tags = self.initial_data.get('tags')
-        ingredient_list = []
-        for ingredient_item in ingredients:
-            ingredient = get_object_or_404(Ingredient,
-                                           id=ingredient_item['id'])
-            if ingredient in ingredient_list:
-                raise serializers.ValidationError('Ингридиенты должны '
-                                                  'быть уникальными')
-            ingredient_list.append(ingredient)
+        ingredients = data['ingredients']
+        tags = data['tags']
+        self.unique_item(ingredients, Ingredient)
+        self.unique_item(tags, Tag)
         if not tags:
             raise serializers.ValidationError(
                 'Укажите тэг для рецепта!')
@@ -180,11 +167,16 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
         return data
 
     def create_ingredients(self, ingredients, recipe):
+        bulk_list = ()
         for ingredient in ingredients:
-            AmountIngredient.objects.create(
-                recipe=recipe,
-                ingredient_id=ingredient.get('id'),
-                amount=ingredient.get('amount'), )
+            bulk_list.append(
+                AmountIngredient(
+                    recipe=recipe,
+                    ingredient_id=ingredient.get('id'),
+                    amount=ingredient.get('amount'),
+                )
+            )
+        AmountIngredient.objects.bulk_create(bulk_list)
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')
