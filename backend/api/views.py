@@ -91,7 +91,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class IngredientsViewSet(viewsets.ModelViewSet):
-    """Работет с игридиентами. Изменение и создание ингридиентов
+    """Работет с игридиентами. Изменение и создание ингредиентов
        разрешено только админам.
     """
 
@@ -199,7 +199,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             f'{timezone.localtime().strftime("%d/%m/%Y %H:%M")}\n\n'
         )
         for ing in ingredients:
-            shopping_list += (f'{ing["ingredient__name"]}: {ing["amount"]} '
+            shopping_list += (f'{ing["ingredient__name"]}: {ing["amount_sum"]} '
                               f'{ing["ingredient__measurement_unit"]}\n')
         shopping_list += '\nFoodgram'
         response = HttpResponse(

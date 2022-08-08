@@ -113,8 +113,8 @@ class Ingredient(models.Model):
     """ Модель ингредиентов для рецептов.
 
         Поля:
-        name(str) - Уникальное название ингридиента.
-        measurement_unit(str) - Единицы измерения ингридента.
+        name(str) - Уникальное название ингредиента.
+        measurement_unit(str) - Единицы измерения ингредента.
     """
 
     name = models.CharField(
@@ -138,7 +138,7 @@ class Ingredient(models.Model):
 
 
 class AmountIngredient(models.Model):
-    """ Количество ингридиентов в блюде."""
+    """ Количество ингредиентов в блюде."""
 
     recipe = models.ForeignKey(
         Recipe,
