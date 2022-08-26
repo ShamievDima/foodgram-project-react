@@ -9,14 +9,13 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from .filters import IngredientNameFilter, RecipeFilter
-from .models import (Favorite, Follow, Ingredient, AmountIngredient,
+from .models import (Favorite, Follow, Ingredient,
                      Purchase, Recipe, Tag, User)
 from .paginators import CustomPagination
 from .permissions import IsOwnerOrAdminOrReadOnly
 from .serializers import (FavoritesSerializer, ListRecipeSerializer,
                           IngredientSerializer, PurchaseSerializer,
-                          CreateUpdateRecipeSerializer,
-                          ShowFollowerSerializer,
+                          CreateUpdateRecipeSerializer, ShowFollowerSerializer,
                           TagSerializer, UserSerializer)
 
 
@@ -32,8 +31,6 @@ class CustomUserViewSet(UserViewSet):
         permission_classes=[IsAuthenticated]
     )
     def subscribe(self, request, id=None):
-        """ Создание подписки пользоваетеля на автора."""
-
         user = request.user
         author = get_object_or_404(User, id=id)
         if user == author:
@@ -52,8 +49,6 @@ class CustomUserViewSet(UserViewSet):
 
     @subscribe.mapping.delete
     def delete_subscribe(self, request, id=None):
-        """ Удаление подписки пользоваетеля на автора."""
-
         user = request.user
         author = get_object_or_404(User, id=id)
         subscribe = get_object_or_404(
@@ -67,7 +62,6 @@ class CustomUserViewSet(UserViewSet):
         permission_classes=[IsAuthenticated]
     )
     def subscriptions(self, request):
-        """ Получение подписок пользоваетеля."""
         user = request.user
         queryset = Follow.objects.filter(user=user)
         pages = self.paginate_queryset(queryset)
@@ -80,10 +74,6 @@ class CustomUserViewSet(UserViewSet):
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
-    """Работает с тэгами. Изменение и создание тэгов разрешено
-       только админам.
-    """
-
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = (AllowAny,)
@@ -91,10 +81,6 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class IngredientsViewSet(viewsets.ModelViewSet):
-    """Работет с игридиентами. Изменение и создание ингредиентов
-       разрешено только админам.
-    """
-
     serializer_class = IngredientSerializer
     queryset = Ingredient.objects.all()
     pagination_class = None
@@ -103,16 +89,6 @@ class IngredientsViewSet(viewsets.ModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    """Работает с рецептами.
-
-    Вывод, создание, редактирование, добавление/удаление
-    в избранное и список покупок.
-    Отправка текстового файла со списком покупок.
-    Для авторизованных пользователей — возможность добавить
-    рецепт в избранные и в список покупок.
-    Изменять рецепт может только автор или админы.
-    """
-
     queryset = Recipe.objects.all()
     pagination_class = CustomPagination
     permission_classes = (IsOwnerOrAdminOrReadOnly,)
@@ -188,18 +164,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=False, permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
         user = request.user
-        ingredients = AmountIngredient.objects.filter(
+        ingredients = IngredientInRecipe.objects.filter(
             purchases__user=user).values(
                 'ingredient__name',
                 'ingredient__measurement_unit'
-        ).annotate(amount_sum=Sum('amount'))
+        ).annotate(amount=Sum('amount'))
         filename = f'{user.username}_shopping_list.txt'
         shopping_list = (
             f'Список покупок({user.first_name})\n'
             f'{timezone.localtime().strftime("%d/%m/%Y %H:%M")}\n\n'
         )
         for ing in ingredients:
-            shopping_list += (f'{ing["ingredient__name"]}: {ing["amount_sum"]} '
+            shopping_list += (f'{ing["ingredient__name"]}: {ing["amount"]} '
                               f'{ing["ingredient__measurement_unit"]}\n')
         shopping_list += '\nFoodgram'
         response = HttpResponse(

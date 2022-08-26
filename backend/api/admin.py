@@ -12,7 +12,6 @@ class IngredientAdmin(admin.ModelAdmin):
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('author', 'name', 'favorited')
     list_filter = ('author', 'name', 'tags')
-    exclude = ('ingredients',)
 
     def favorited(self, obj):
         return Favorite.objects.filter(recipe=obj).count()
@@ -37,7 +36,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
 
 
 class RecipeIngredientAdmin(admin.ModelAdmin):
-    list_display = ('ingredient', 'amount')
+    list_display = ('ingredient', 'amount', 'recipe')
 
 
 admin.site.register(Ingredient, IngredientAdmin)
