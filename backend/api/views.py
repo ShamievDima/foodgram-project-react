@@ -9,7 +9,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from .filters import IngredientNameFilter, RecipeFilter
-from .models import (Favorite, Follow, Ingredient,
+from .models import (Favorite, Follow, Ingredient, AmountIngredient,
                      Purchase, Recipe, Tag, User)
 from .paginators import CustomPagination
 from .permissions import IsOwnerOrAdminOrReadOnly
@@ -164,7 +164,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=False, permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
         user = request.user
-        ingredients = IngredientInRecipe.objects.filter(
+        ingredients = AmountIngredient.objects.filter(
             purchases__user=user).values(
                 'ingredient__name',
                 'ingredient__measurement_unit'

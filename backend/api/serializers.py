@@ -176,7 +176,9 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
         recipe = Recipe.objects.create(image=image, **validated_data)
         ingredients_list = []
         for ingredient in ingredients:
-            ingredient_amount, status = AmountIngredient.objects.get_or_create(**ingredient)
+            ingredient_amount, status = (
+                AmountIngredient.objects.get_or_create(**ingredient)
+            )
             ingredients_list.append(ingredient_amount)
         recipe.ingredients.set(ingredients_list)
         recipe.tags.set(tags)
@@ -195,7 +197,9 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
         instance.save()
         ingredients_list = []
         for ingredient in ingredients:
-            ingredient_amount, status = AmountIngredient.objects.get_or_create(**ingredient)
+            ingredient_amount, status = (
+                AmountIngredient.objects.get_or_create(**ingredient)
+            )
             ingredients_list.append(ingredient_amount)
         instance.ingredients.set(ingredients_list)
         instance.tags.set(tags)
@@ -209,7 +213,10 @@ class FollowerRecipeSerializer(serializers.ModelSerializer):
 
 
 class ShowFollowerSerializer(serializers.ModelSerializer):
-    """ Сериализатор для вывода авторов на которых подписан текущий пользователь."""
+    """
+    Сериализатор для вывода авторов на которых подписан
+    текущий пользователь.
+    """
 
     id = serializers.ReadOnlyField(source='author.id')
     email = serializers.ReadOnlyField(source='author.email')
