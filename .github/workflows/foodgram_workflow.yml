@@ -101,18 +101,9 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
             cd foodgram/
-            
-            sudo docker-compose stop
-            sudo docker-compose rm foodgram_backend_1
 
-            sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/foodgram-backend:latest
-            sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/frontend:latest
-            
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram-backend:latest
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/frontend:latest
-            
+            sudo rm .env
             sudo touch .env
-            sudo chmod 666 .env
             
             echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
@@ -122,8 +113,16 @@ jobs:
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
 
-            sudo chmod 644 .env
+            sudo docker-compose stop
+            sudo docker-compose rm foodgram_backend_1
+            sudo docker rm foodgram_frontend_1
+
+            sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/foodgram-backend:latest
+            sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/frontend:latest
             
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram-backend:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/frontend:latest
+                        
             sudo docker-compose up -d
 
   # telegram_message:
