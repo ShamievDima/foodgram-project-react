@@ -85,7 +85,7 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram-frontend:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/frontend:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -106,10 +106,10 @@ jobs:
             sudo docker-compose rm foodgram_backend_1
 
             sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/foodgram-backend:latest
-            sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/foodgram-frontend:latest
+            sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/frontend:latest
             
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram-backend:latest
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram-frontend:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/frontend:latest
             
             sudo rm .env
             sudo touch .env
