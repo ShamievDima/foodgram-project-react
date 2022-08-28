@@ -50,10 +50,12 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           stack_file_name: docker-compose.yml
           script: |
+            sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/foodgram-backend:latest
+            sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/frontend:latest
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram-backend:latest
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/frontend:latest
             sudo docker-compose stop
-            sudo docker-compose rm backend
+            sudo docker-compose rm foodgram_backend_1
             sudo fuser -k 80/tcp
             sudo rm .env
             sudo touch .env
