@@ -14,8 +14,8 @@ jobs:
     - name: Create projects directory
       uses: appleboy/ssh-action@master
       with:
-        host: ${{ secrets.HOST_IP }}
-        username: ${{ secrets.HOST_USER }}
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USER }}
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.PASSPHRASE }}
         script: |
@@ -26,10 +26,11 @@ jobs:
       uses: garygrossgarten/github-action-scp@release
       with:
           local: infra/
-          remote: /home/${{ secrets.HOST_USER }}/foodgram/
-          host: ${{ secrets.HOST_IP }}
-          username: ${{ secrets.HOST_USER }}
+          remote: /home/${{ secrets.USER }}/foodgram/
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
           privateKey: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
 
   build_and_push_to_docker_hub:
     name: Push Docker image to Docker Hub
@@ -95,8 +96,8 @@ jobs:
             sudo docker-compose stop
             sudo docker rm foodgram_frontend_1
             sudo docker rm foodgram_backend_1
-            sudo docker rmi ${{ secrets.DOCKER_USER }}/frontend
-            sudo docker rmi ${{ secrets.DOCKER_USER }}/foodgram-backend
+            sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/frontend
+            sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/foodgram-backend
             sudo docker-compose up -d
 
 #on:
