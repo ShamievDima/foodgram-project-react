@@ -1,8 +1,35 @@
 name: foodgram_workflow
 
-on: [push]
+on:
+  push:
+    branches: [ master ]
 
 jobs:
+  copy_infra_to_server:
+    name: Copy docker-compose.yml and nginx.conf
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Create projects directory
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST_IP }}
+        username: ${{ secrets.HOST_USER }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          sudo rm -rf foodgram/
+          mkdir -p foodgram/
+
+    - name: Copy files
+      uses: garygrossgarten/github-action-scp@release
+      with:
+          local: infra/
+          remote: /home/${{ secrets.HOST_USER }}/foodgram/
+          host: ${{ secrets.HOST_IP }}
+          username: ${{ secrets.HOST_USER }}
+          privateKey: ${{ secrets.SSH_KEY }}
+
   build_and_push_to_docker_hub:
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
@@ -24,20 +51,23 @@ jobs:
       - name: Push to Docker Hub Backend
         uses: docker/build-push-action@v2
         with:
+          context: backend/
           push: true
-          context: ./backend/
           tags: ${{ secrets.DOCKER_USERNAME }}/foodgram-backend:latest
 
       - name: Push to Docker Hub Frontend
         uses: docker/build-push-action@v2
         with:
+          context: frontend/
           push: true
-          context: ./frontend/
           tags: ${{ secrets.DOCKER_USERNAME }}/frontend:latest
 
   deploy:
     runs-on: ubuntu-latest
-    needs: build_and_push_to_docker_hub
+    needs: [
+      copy_infra_to_server,
+      build_and_push_to_docker_hub
+    ]
     if: github.ref == 'refs/heads/master'
 
     steps:
@@ -50,26 +80,23 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           stack_file_name: docker-compose.yml
           script: |
-            sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/foodgram-backend:latest
-            sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/frontend:latest
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram-backend:latest
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/frontend:latest
-#            sudo docker-compose stop
-#            sudo docker-compose rm foodgram_backend_1
-#            sudo fuser -k 80/tcp
-#            sudo rm .env
-#            sudo touch .env
-#            sudo chmod 666 .env
-#            echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
-#            echo DB_NAME=${{ secrets.DB_NAME }} >> .env
-#            echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
-#            echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
-#            echo DB_HOST=${{ secrets.DB_HOST }} >> .env
-#            echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-#            sudo chmod 644 .env
-#            sudo docker-compose up -d
-#            sudo docker-compose exec -T backend python manage.py migrate --noinput
-#            sudo docker-compose exec -T backend python manage.py collectstatic --no-input
+            cd foodgram/
+            touch .env
+            echo DEBUG=${{ secrets.DEBUG }} >> .env
+            echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
+            echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
+            echo DB_NAME=${{ secrets.DB_NAME }} >> .env
+            echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
+            echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
+            echo DB_HOST=${{ secrets.DB_HOST }} >> .env
+            echo DB_PORT=${{ secrets.DB_PORT }} >> .env
+    
+            sudo docker-compose stop
+            sudo docker rm foodgram_frontend_1
+            sudo docker rm foodgram_backend_1
+            sudo docker rmi ${{ secrets.DOCKER_USER }}/frontend
+            sudo docker rmi ${{ secrets.DOCKER_USER }}/foodgram-backend
+            sudo docker-compose up -d
 
 #on:
 #  push:
