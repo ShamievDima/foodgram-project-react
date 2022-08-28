@@ -114,6 +114,7 @@ jobs:
 
             sudo chmod 644 .env
 
+            cd foodgram/
             sudo docker-compose stop
             sudo docker-compose rm foodgram_backend_1
 
