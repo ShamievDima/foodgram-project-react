@@ -139,19 +139,30 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 6
 }
 
+# DJOSER = {
+#     'LOGIN_FIELD': 'email',
+#     'HIDE_USERS': False,
+#     'PERMISSIONS': {
+#         'resipe': ('api.permissions.AuthorStaffOrReadOnly',),
+#         'recipe_list': ('api.permissions.AuthorStaffOrReadOnly',),
+#         'user': ('api.permissions.IsOwnerOrAdminOrReadOnly',),
+#         'user_list': ('api.permissions.IsOwnerOrAdminOrReadOnly',),
+#     },
+#     'SERIALIZERS': {
+#         'user': 'api.serializers.UserSerializer',
+#         'user_list': 'api.serializers.UserSerializer',
+#         'current_user': 'api.serializers.UserSerializer',
+#         'user_create': 'api.serializers.UserSerializer',
+#     },
+# }
 DJOSER = {
     'LOGIN_FIELD': 'email',
-    'HIDE_USERS': False,
-    'PERMISSIONS': {
-        'resipe': ('api.permissions.AuthorStaffOrReadOnly',),
-        'recipe_list': ('api.permissions.AuthorStaffOrReadOnly',),
-        'user': ('api.permissions.IsOwnerOrAdminOrReadOnly',),
-        'user_list': ('api.permissions.IsOwnerOrAdminOrReadOnly',),
-    },
+    'PASSWORD_RESET_CONFIRM_URL': 'users/reset_password/{uid}/{token}',
+    'USERNAME_RESET_CONFIRM_URL': 'users/reset_email/{uid}/{token}',
+    'ACTIVATION_URL': 'users/activation/{uid}/{token}',
     'SERIALIZERS': {
-        'user': 'api.serializers.UserSerializer',
-        'user_list': 'api.serializers.UserSerializer',
-        'current_user': 'api.serializers.UserSerializer',
-        'user_create': 'api.serializers.UserSerializer',
+        'user': 'users.serializers.CustomUserSerializer',
+        'user_create': 'users.serializers.CustomUserCreateSerializer',
+        'set_password': 'users.serializers.CustomSetPasswordSerializer',
     },
 }

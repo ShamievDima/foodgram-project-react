@@ -36,30 +36,30 @@ class UserSerializer(serializers.ModelSerializer):
             user=request.user,
             author=obj.id).exists()
 
-    def create(self, validated_data):
-        """ Создание нового пользователя."""
-        user = User(
-            email=validated_data['email'],
-            username=validated_data['username'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name'],
-        )
-        user.set_password(validated_data['password'])
-        user.save()
-        return user
-
-    def validate_username(self, username):
-        """ Проверяет введённый юзернейм."""
-        if len(username) < 3:
-            raise serializers.ValidationError(
-                'Длина username допустима от '
-                f'{3} до {150} букв'
-            )
-        # if not username.isalpha():
-        #     raise serializers.ValidationError(
-        #         'В username допустимы только буквы.'
-        #     )
-        return username.capitalize()
+    # def create(self, validated_data):
+    #     """ Создание нового пользователя."""
+    #     user = User(
+    #         email=validated_data['email'],
+    #         username=validated_data['username'],
+    #         first_name=validated_data['first_name'],
+    #         last_name=validated_data['last_name'],
+    #     )
+    #     user.set_password(validated_data['password'])
+    #     user.save()
+    #     return user
+    #
+    # def validate_username(self, username):
+    #     """ Проверяет введённый юзернейм."""
+    #     if len(username) < 3:
+    #         raise serializers.ValidationError(
+    #             'Длина username допустима от '
+    #             f'{3} до {150} букв'
+    #         )
+    #     # if not username.isalpha():
+    #     #     raise serializers.ValidationError(
+    #     #         'В username допустимы только буквы.'
+    #     #     )
+    #     return username.capitalize()
 
 
 class TagSerializer(serializers.ModelSerializer):
