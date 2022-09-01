@@ -77,7 +77,7 @@ DATABASES = {
     'default': {
         'ENGINE': os.getenv(
             'DB_ENGINE',
-            default='django.db.backends.postgresql_psycopg2'
+            default='django.db.backends.postgresql'
         ),
         'NAME': os.getenv('DB_NAME', default='foodgram'),
         'USER': os.getenv('POSTGRES_USER', default='postgres'),
