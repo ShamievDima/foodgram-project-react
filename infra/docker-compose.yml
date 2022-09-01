@@ -11,6 +11,9 @@ services:
   backend:
     image: shamievda/foodgram-backend:latest
     restart: always
+    command: >
+      bash -c "python manage.py migrate &&
+      python manage.py collectstatic --noinput"
     volumes:
       - static_value:/app/static/
       - media_value:/app/media/
@@ -45,5 +48,4 @@ services:
 volumes:
   static_value:
   media_value:
-  result_build:
   postgres_data:
