@@ -41,6 +41,6 @@ docker exec -ti minibaev_backend_1 python manage.py migrate
 docker exec -it minibaev_backend_1 python manage.py createsuperuser
 ```
 
-Проект запущен и доступен по [адресу](http://51.250.107.124/admin/)
+Проект запущен и доступен по [адресу](http://51.250.107.124/)
 
 ### Автор: Дмитрий Шамиев.
