@@ -83,6 +83,7 @@ jobs:
           stack_file_name: docker-compose.yml
           script: |
             cd foodgram/
+            sudo fuser -k 80/tcp
             touch .env
             echo DEBUG=${{ secrets.DEBUG }} >> .env
             echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
