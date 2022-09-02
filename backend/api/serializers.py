@@ -180,6 +180,9 @@ class CreateUpdateRecipeSerializer(serializers.ModelSerializer):
         instance.tags.set(tags)
         return instance
 
+    def to_representation(self, instance):
+        return ListRecipeSerializer(instance, context=self.context).data
+
 
 class FollowerRecipeSerializer(serializers.ModelSerializer):
     class Meta:

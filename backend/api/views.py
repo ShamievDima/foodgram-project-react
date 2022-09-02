@@ -1,12 +1,18 @@
-from django.http.response import HttpResponse
-from django.db.models import Sum
-from django.utils import timezone
+from datetime import timezone
+import io
+
+from django.http.response import HttpResponse, FileResponse
+from django.db.models import Sum, F
 from djoser.views import UserViewSet
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfgen import canvas
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.status import HTTP_400_BAD_REQUEST
 
 from .filters import IngredientNameFilter, RecipeFilter
 from .models import (Favorite, Follow, Ingredient, AmountIngredient,
@@ -161,25 +167,21 @@ class RecipeViewSet(viewsets.ModelViewSet):
             request, Purchase, pk
         )
 
-    @action(detail=False, permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['get'],
+            permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
-        user = request.user
-        ingredients = AmountIngredient.objects.filter(
-            recipe__purchases__user=user).values(
-            'ingredient__name',
-            'ingredient__measurement_unit'
-        ).annotate(amount=Sum('amount'))
-        filename = f'{user.username}_shopping_list.txt'
-        shopping_list = (
-            f'Список покупок({user.first_name})\n'
-            f'{timezone.localtime().strftime("%d/%m/%Y %H:%M")}\n\n'
-        )
-        for ing in ingredients:
-            shopping_list += (f'{ing["ingredient__name"]}: {ing["amount"]} '
-                              f'{ing["ingredient__measurement_unit"]}\n')
-        shopping_list += '\nFoodgram'
-        response = HttpResponse(
-            shopping_list, content_type='text.txt; charset=utf-8'
-        )
+        queryset = self.get_queryset()
+        cart_objects = Purchase.objects.filter(user=request.user)
+        recipes = queryset.filter(purchases__in=cart_objects)
+        ingredients = AmountIngredient.objects.filter(recipes__in=recipes)
+        ing_types = Ingredient.objects.filter(
+            ingredients_amount__in=ingredients
+        ).annotate(total=Sum('ingredients_amount__amount'))
+
+        lines = [f'{ing_type.name}, {ing_type.total}'
+                 f' {ing_type.measurement_unit}' for ing_type in ing_types]
+        filename = 'shopping_ingredients.txt'
+        response_content = '\n'.join(lines)
+        response = HttpResponse(response_content, content_type='text/plain')
         response['Content-Disposition'] = f'attachment; filename={filename}'
         return response
