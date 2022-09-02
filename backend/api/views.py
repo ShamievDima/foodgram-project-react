@@ -1,18 +1,11 @@
-from datetime import timezone
-import io
-
-from django.http.response import HttpResponse, FileResponse
-from django.db.models import Sum, F
+from django.http.response import HttpResponse
+from django.db.models import Sum
 from djoser.views import UserViewSet
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfgen import canvas
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST
 
 from .filters import IngredientNameFilter, RecipeFilter
 from .models import (Favorite, Follow, Ingredient, AmountIngredient,
