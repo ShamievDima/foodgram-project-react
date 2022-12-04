@@ -34,11 +34,11 @@ cd infra/ && docker-compose up -d --build
 ```
 2. Необходимо выполнить миграции и собрать статику приложения, для этого запустите скрипт
 ```
-docker exec -ti minibaev_backend_1 python manage.py migrate
+docker exec -ti shamiev_backend_1 python manage.py migrate
 ```
 3. Для использования панели администратора по адресу http://localhost/admin/ необходимо создать суперпользователя.
 ```
-docker exec -it minibaev_backend_1 python manage.py createsuperuser
+docker exec -it shamiev_backend_1 python manage.py createsuperuser
 ```
 
 Проект запущен и доступен по [адресу](http://51.250.107.124/)
